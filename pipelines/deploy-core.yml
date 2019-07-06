@@ -1,0 +1,7 @@
+variables:
+  var1: value1
+
+jobs:
+- job: deployCore
+  steps:
+  - script: echo First step!
