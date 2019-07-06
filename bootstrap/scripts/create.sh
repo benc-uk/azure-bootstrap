@@ -51,5 +51,10 @@ az devops service-endpoint create --name $GITHUB_CONN_NAME --service-endpoint-ty
 GITHUB_CONN_ID=$(az devops service-endpoint list --project $ADO_PROJECT --organization $ADO_ORG --query "[?name == '$GITHUB_CONN_NAME'].id" -o tsv)
 echo -e "\e[34m »»» 🍳  \e[32mConnection ID is \e[1m'$GITHUB_CONN_ID'\e[0m..."
 
+echo -e "\e[34m »»» ✍  \e[32mCreating service connection to Azure\e[0m..."
+az devops service-endpoint create --name $GITHUB_CONN_NAME --service-endpoint-type azurerm  --authorization-scheme PersonalAccessToken --project $ADO_PROJECT --organization $ADO_ORG -o table
+GITHUB_CONN_ID=$(az devops service-endpoint list --project $ADO_PROJECT --organization $ADO_ORG --query "[?name == '$GITHUB_CONN_NAME'].id" -o tsv)
+echo -e "\e[34m »»» 🍳  \e[32mConnection ID is \e[1m'$GITHUB_CONN_ID'\e[0m..."
+
 echo -e "\e[34m »»» ✍  \e[32mCreating pipeline \e[1m'Deploy Azure Core'\e[0m..."
 az pipelines create --name 'Deploy Azure Core' --yml-path /bootstrap/pipelines/deploy-core.yml --repository $GITHUB_REPO --branch master --service-connection $GITHUB_CONN_ID --project $ADO_PROJECT --organization $ADO_ORG -o table

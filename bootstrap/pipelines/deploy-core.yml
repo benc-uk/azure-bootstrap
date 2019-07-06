@@ -4,10 +4,16 @@ variables:
 
 jobs:
 - job: deployCore
+  displayName: Deploy with Terraform
+  
   steps:
   - bash: terraform init
     displayName: Terraform init
     workingDirectory: bootstrap/terraform/core    
-  - bash: terraform apply -auto-approve
+
+  - task: AzureCLI@1
     displayName: Terraform apply core
-    workingDirectory: bootstrap/terraform/core
+    inputs:
+      azureSubscription: $azureConnection
+      inlineScript: terraform apply -auto-approve
+      workingDirectory: bootstrap/terraform/core
