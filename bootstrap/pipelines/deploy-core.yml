@@ -7,7 +7,7 @@ jobs:
   steps:
   - bash: terraform init
     displayName: Terraform init
-    workingDirectory: /bootstrap/terraform/core    
+    workingDirectory: bootstrap/terraform/core    
   - bash: terraform apply -auto-approve
     displayName: Terraform apply core
-    workingDirectory: /bootstrap/terraform/core
+    workingDirectory: bootstrap/terraform/core
