@@ -1,6 +1,6 @@
 # Change these
 ADO_ORG="https://dev.azure.com/bencoleman"
-ADO_PROJECT="newproj"
+ADO_PROJECT="newproj32"
 
 AZURE_MGMT_RESGRP="bootstrap-core"
 
