@@ -1,6 +1,13 @@
+#
+# 
+#
+
+trigger: none
+
 variables:
   TF_VARS_location: "North Europe"
   TF_VARS_resGroup: "core.foo1"
+  azureConnection: "azure"
 
 jobs:
 - job: deployCore
@@ -14,6 +21,6 @@ jobs:
   - task: AzureCLI@1
     displayName: Terraform apply core
     inputs:
-      azureSubscription: $azureConnection
+      azureSubscription: $(azureConnection)
       inlineScript: terraform apply -auto-approve
       workingDirectory: bootstrap/terraform/core
