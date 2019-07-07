@@ -1,9 +1,9 @@
-variable "location" {
+variable "LOCATION" {
   type = string
   default = "West Europe"
 }
 
-variable "resGroup" {
+variable "RES_GROUP" {
   type = string
   default = "bootstrap.core"
 }

@@ -38,23 +38,41 @@ then
   exit
 fi
 
+# Munge values into vars.sh 
+AZURE_SUB_ID=$(az account show --query "id" -o tsv)
+AZURE_SUB_NAME=$(az account show --query "name" -o tsv)
+AZURE_TENANT_ID=$(az account show --query "tenantId" -o tsv)
+sed "s/AZURE_TENANT_ID=\".*\"/AZURE_TENANT_ID=\"$AZURE_TENANT_ID\"/g" -i "$DIR/../vars.sh"
+sed "s/AZURE_SUB_ID=\".*\"/AZURE_SUB_ID=\"$AZURE_SUB_ID\"/g" -i "$DIR/../vars.sh"
+sed "s/AZURE_SUB_NAME=\".*\"/AZURE_SUB_NAME=\"$AZURE_SUB_NAME\"/g" -i "$DIR/../vars.sh"
+
 echo -e "\e[34m »»» ✍  \e[32mCreating Azure DevOps project \e[1m'$ADO_PROJECT'\e[0m..."
 az devops project create --name $ADO_PROJECT --description "$ADO_PROJECT_DESC" --org $ADO_ORG --process $ADO_PROJECT_PROCESS -o table
 
-#echo -e "\e[31m »»» 📥  \e[32mCreating repo \e[1m'$ADO_PROJECT'\e[0m\e[32m and importing from \e[1m'$REPO_SOURCE'\e[0m..."
-#az repos create --name $REPO_NAME --org $ADO_ORG --project $ADO_PROJECT -o table
-#az repos import create --repository $REPO_NAME --organization $ADO_ORG  --git-source-url $REPO_SOURCE --project $ADO_PROJECT -o table
-#echo ""
+#####az repos create --name $REPO_NAME --org $ADO_ORG --project $ADO_PROJECT -o table
+#####az repos import create --repository $REPO_NAME --organization $ADO_ORG  --git-source-url $REPO_SOURCE --project $ADO_PROJECT -o table
 
-echo -e "\e[34m »»» ✍  \e[32mCreating service connection to GitHub\e[0m..."
-az devops service-endpoint create --name $GITHUB_CONN_NAME --service-endpoint-type github --github-url https://github.com/benc-uk --authorization-scheme PersonalAccessToken --project $ADO_PROJECT --organization $ADO_ORG -o table
+echo -e "\e[34m »»» 🤖  \e[32mCreating Service Principal \e[1m'$SP_NAME'\e[0m..."
+AZURE_SP_SECRET=$(az ad sp create-for-rbac --name "$SP_NAME" --query password -o tsv)
+
+echo -e "\e[34m »»» ⏱  \e[32mWaiting 60 seconds for identity to fully propogate\e[0m..."
+sleep 60
+AZURE_SP_ID=$(az ad sp list --spn "http://$SP_NAME" --query "[0].appId" -o tsv)
+echo -e "\e[34m »»» 🍳  \e[32mNew service principal ID: \e[1m'$SP_ID\e[0m"
+
+sed "s/AZURE_SP_ID=\".*\"/AZURE_SP_ID=\"$AZURE_SP_ID\"/g" -i "$DIR/../vars.sh"
+sed "s/AZURE_SP_SECRET=\".*\"/AZURE_SP_SECRET=\"$AZURE_SP_SECRET\"/g" -i "$DIR/../vars.sh"
+export AZURE_DEVOPS_EXT_AZURE_RM_SERVICE_PRINCIPAL_KEY="$AZURE_SP_SECRET"
+
+echo -e "\e[34m »»» 🔌  \e[32mCreating DevOps connection to GitHub using PAT\e[0m..."
+az devops service-endpoint create --name $GITHUB_CONN_NAME --service-endpoint-type github --github-url https://github.com --authorization-scheme PersonalAccessToken --project $ADO_PROJECT --organization $ADO_ORG -o table
 GITHUB_CONN_ID=$(az devops service-endpoint list --project $ADO_PROJECT --organization $ADO_ORG --query "[?name == '$GITHUB_CONN_NAME'].id" -o tsv)
 echo -e "\e[34m »»» 🍳  \e[32mConnection ID is \e[1m'$GITHUB_CONN_ID'\e[0m..."
 
-echo -e "\e[34m »»» ✍  \e[32mCreating service connection to Azure\e[0m..."
+echo -e "\e[34m »»» 🔌  \e[32mCreating DevOps connection to Azure using Service Principal\e[0m..."
 az devops service-endpoint create --name $AZURE_CONN_NAME --service-endpoint-type azurerm --azure-rm-subscription-id $AZURE_SUB_ID --azure-rm-tenant-id $AZURE_TENANT_ID --azure-rm-subscription-name "$AZURE_SUB_NAME" --azure-rm-service-principal-id $AZURE_SP_ID --authorization-scheme ServicePrincipal --project $ADO_PROJECT --organization $ADO_ORG -o table
-# AZURE_CONN_ID=$(az devops service-endpoint list --project $ADO_PROJECT --organization $ADO_ORG --query "[?name == '$AZURE_CONN_NAME'].id" -o tsv)
-# echo -e "\e[34m »»» 🍳  \e[32mConnection ID is \e[1m'$GITHUB_CONN_ID'\e[0m..."
+AZURE_CONN_ID=$(az devops service-endpoint list --project $ADO_PROJECT --organization $ADO_ORG --query "[?name == '$AZURE_CONN_NAME'].id" -o tsv)
+echo -e "\e[34m »»» 🍳  \e[32mConnection ID is \e[1m'$GITHUB_CONN_ID'\e[0m..."
 
 echo -e "\e[34m »»» ✍  \e[32mCreating pipeline \e[1m'Deploy Azure Core'\e[0m..."
-az pipelines create --name 'Deploy Azure Core' --yml-path /bootstrap/pipelines/deploy-core.yml --repository $GITHUB_REPO --branch master --service-connection $GITHUB_CONN_ID --project $ADO_PROJECT --organization $ADO_ORG -o table
+az pipelines create --name 'Deploy Azure Core' --yml-path bootstrap/pipelines/deploy-core.yml --repository $GITHUB_REPO --branch dev --service-connection $GITHUB_CONN_ID --project $ADO_PROJECT --organization $ADO_ORG -o table
