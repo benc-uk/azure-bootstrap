@@ -21,6 +21,7 @@ jobs:
   - task: AzureCLI@1
     displayName: Terraform apply core
     inputs:
-      azureSubscription: $(azureConnection)
       inlineScript: terraform apply -auto-approve
       workingDirectory: bootstrap/terraform/core
+      scriptLocation: inlineScript
+      azureSubscription: $(azureConnection)
