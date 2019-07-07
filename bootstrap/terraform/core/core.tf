@@ -3,6 +3,6 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "core" {
-  name     = var.resGroup
-  location = var.location
+  name     = var.RES_GROUP
+  location = var.LOCATION
 }

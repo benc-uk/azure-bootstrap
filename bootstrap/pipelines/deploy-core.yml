@@ -38,7 +38,6 @@ jobs:
         export ARM_TENANT_ID=$(az account show --query "tenantId" -o tsv)
         export ARM_CLIENT_SECRET="$servicePrincipalKey"
         export ARM_CLIENT_ID="$servicePrincipalId"
-        printenv
         terraform apply -auto-approve
       scriptLocation: inlineScript
       azureSubscription: $(azureConnection)
