@@ -34,7 +34,7 @@ jobs:
       inlineScript: |
         EXPORT ARM_CLIENT_SECRET=$(servicePrincipalKey)
         EXPORT ARM_CLIENT_ID=$(servicePrincipalId)
-        printenv
+        terraform apply -auto-approve
       scriptLocation: inlineScript
       azureSubscription: $(azureConnection)
       workingDirectory: bootstrap/terraform/core
