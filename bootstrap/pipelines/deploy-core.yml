@@ -5,11 +5,12 @@
 trigger: none
 
 variables:
-  TF_VARS_location: "North Europe"
-  TF_VARS_resGroup: "core.foo1"
+  # Terraform
+  TF_VAR_location: "North Europe"
+  TF_VAR_resGroup: "core.foo1"
+
   azureConnection: "azure"
-  ARM_CLIENT_ID: "ae1a8673-73ef-459c-b628-5f77ae53c20c"
-  ARM_CLIENT_SECRET: "f9821e3d-4259-40fe-a943-14b61bde9d0c"
+
   ARM_SUBSCRIPTION_ID: "52512f28-c6ed-403e-9569-82a9fb9fec91"
   ARM_TENANT_ID: "72f988bf-86f1-41af-91ab-2d7cd011db47"
 
@@ -22,7 +23,18 @@ jobs:
     displayName: Terraform init
     workingDirectory: bootstrap/terraform/core   
 
-  - bash: terraform apply -auto-approve
-    displayName: Terraform apply core
-    workingDirectory: bootstrap/terraform/core  
+  # - bash: terraform apply -auto-approve
+  #   displayName: Terraform apply core
+  #   workingDirectory: bootstrap/terraform/core  
 
+  - task: AzureCLI@1
+    displayName: Terraform apply core
+    inputs:
+      addSpnToEnvironment: true
+      inlineScript: |
+        EXPORT ARM_CLIENT_SECRET=$(servicePrincipalKey)
+        EXPORT ARM_CLIENT_ID=$(servicePrincipalId)
+        printenv
+      scriptLocation: inlineScript
+      azureSubscription: $(azureConnection)
+      workingDirectory: bootstrap/terraform/core
