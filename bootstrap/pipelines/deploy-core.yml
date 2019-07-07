@@ -34,8 +34,8 @@ jobs:
     inputs:
       addSpnToEnvironment: true
       inlineScript: |
-        EXPORT ARM_CLIENT_SECRET=$(servicePrincipalKey)
-        EXPORT ARM_CLIENT_ID=$(servicePrincipalId)
+        export ARM_CLIENT_SECRET=$(servicePrincipalKey)
+        export ARM_CLIENT_ID=$(servicePrincipalId)
         terraform apply -auto-approve
       scriptLocation: inlineScript
       azureSubscription: $(azureConnection)
