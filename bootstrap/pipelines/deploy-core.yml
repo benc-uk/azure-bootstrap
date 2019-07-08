@@ -13,4 +13,4 @@ jobs:
     name: macOS
     azureConnectionName: $(azureConnection)
     terraformDir: bootstrap/terraform/core
-    varFile: bootstrap/vars.tfvars
+    varFile: /bootstrap/vars.tfvars
