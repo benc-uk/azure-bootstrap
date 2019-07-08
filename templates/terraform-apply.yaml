@@ -1,0 +1,36 @@
+#
+# Terraform deployment template
+# Uses standard Azure service connection to store credentials
+#
+# Parameters:
+# * azureConnectionName - Name of Azure service connection to use
+# * terraformDir - Path holding .tf files where apply will be run from
+# * varFile - Location of .tfvars file to use
+# * dependsOn - Previous job dependecy 
+#
+
+jobs:
+- job: deployWithTF
+  displayName: Deploy ${{ parameters.terraformDir }} with Terraform
+  pool:
+    vmImage: ${{ coalesce(parameters.vmImage, 'ubuntu-16.04') }}
+  dependsOn: ${{ parameters.dependsOn }}
+
+  steps:
+  - bash: terraform init -input=false 
+    displayName: Terraform init 
+    workingDirectory: ${{ parameters.terraformDir }}  
+
+  - task: AzureCLI@1
+    displayName: Terraform apply core
+    inputs:
+      addSpnToEnvironment: true
+      inlineScript: |
+        export ARM_SUBSCRIPTION_ID=$(az account show --query "id" -o tsv)
+        export ARM_TENANT_ID=$(az account show --query "tenantId" -o tsv)
+        export ARM_CLIENT_SECRET="$servicePrincipalKey"
+        export ARM_CLIENT_ID="$servicePrincipalId"
+        terraform apply -auto-approve -input=false -var-file=${{ parameters.varFile }} 
+      scriptLocation: inlineScript
+      azureSubscription: ${{ parameters.azureConnectionName }} 
+      workingDirectory: ${{ parameters.terraformDir }} 

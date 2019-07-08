@@ -5,40 +5,12 @@
 trigger: none
 
 variables:
-  # Terraform
-  TF_VAR_LOCATION: "North Europe"
-  TF_VAR_RES_GROUP: "core.foo1"
-
   azureConnection: "azure"
 
-  # ARM_SUBSCRIPTION_ID: "52512f28-c6ed-403e-9569-82a9fb9fec91"
-  # ARM_TENANT_ID: "72f988bf-86f1-41af-91ab-2d7cd011db47"
-
 jobs:
-- job: deployCore
-  displayName: Deploy with Terraform
-  pool:
-    vmImage: ubuntu-16.04
-
-  steps:
-  - bash: terraform init
-    displayName: Terraform init
-    workingDirectory: bootstrap/terraform/core   
-
-  # - bash: terraform apply -auto-approve
-  #   displayName: Terraform apply core
-  #   workingDirectory: bootstrap/terraform/core  
-
-  - task: AzureCLI@1
-    displayName: Terraform apply core
-    inputs:
-      addSpnToEnvironment: true
-      inlineScript: |
-        export ARM_SUBSCRIPTION_ID=$(az account show --query "id" -o tsv)
-        export ARM_TENANT_ID=$(az account show --query "tenantId" -o tsv)
-        export ARM_CLIENT_SECRET="$servicePrincipalKey"
-        export ARM_CLIENT_ID="$servicePrincipalId"
-        terraform apply -auto-approve
-      scriptLocation: inlineScript
-      azureSubscription: $(azureConnection)
-      workingDirectory: bootstrap/terraform/core
+- template: templates/terraform-apply.yaml
+  parameters:
+    name: macOS
+    azureConnectionName: $(azureConnection)
+    terraformDir: bootstrap/terraform/core
+    varFile: bootstrap/vars.tfvars
