@@ -12,5 +12,5 @@ jobs:
   parameters:
     name: macOS
     azureConnectionName: $(azureConnection)
-    terraformDir: $(System.DefaultWorkingDirectory)/bootstrap/terraform/core
-    varFile: $(System.DefaultWorkingDirectory)/bootstrap/vars.tfvars
+    terraformDir: $(Build.SourcesDirectory)/bootstrap/terraform/core
+    varFile: $(Build.SourcesDirectory)/bootstrap/vars.tfvars
