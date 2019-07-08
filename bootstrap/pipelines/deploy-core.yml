@@ -8,7 +8,7 @@ variables:
   azureConnection: "azure"
 
 jobs:
-- template: templates/terraform-apply.yaml
+- template: /templates/terraform-apply.yaml
   parameters:
     name: macOS
     azureConnectionName: $(azureConnection)

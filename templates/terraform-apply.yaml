@@ -6,7 +6,7 @@
 # * azureConnectionName - Name of Azure service connection to use
 # * terraformDir - Path holding .tf files where apply will be run from
 # * varFile - Location of .tfvars file to use
-# * dependsOn - Previous job dependecy 
+# * dependsOn - Previous job dependency (optional) 
 #
 
 jobs:
