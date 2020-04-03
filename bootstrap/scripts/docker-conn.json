@@ -1,0 +1,17 @@
+{
+  "authorization": {
+    "scheme": "UsernamePassword",
+    "parameters": {
+      "registry": "https://index.docker.io/v1/",
+      "username": "bencuk",
+      "password": "blahblahblah"
+    }
+  },
+  "data": {
+    "registrytype": "DockerHub"
+  },
+  "description": "Test foo",
+  "name": "docker-conn-1",
+  "type": "dockerregistry",
+  "url": "https://hub.docker.com/"
+}
